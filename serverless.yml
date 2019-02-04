@@ -1,0 +1,32 @@
+service: dato-to-s3
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  region: eu-central-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+      Resource: "arn:aws:s3:::${self:custom.bucket}/*"
+
+plugins:
+  - serverless-dotenv-plugin
+
+custom:
+  bucket: dato-content
+
+functions:
+  main:
+    handler: handler.main
+
+    environment:
+      AUTH_USER: ${env:AUTH_USER}
+      AUTH_PASSWORD: ${env:AUTH_PASSWORD}
+      DATOCMS_API_TOKEN: ${env:DATOCMS_API_TOKEN}
+      BUCKET: ${self:custom.bucket}
+
+    events:
+      - http:
+          path: /
+          method: post
